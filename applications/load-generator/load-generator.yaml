@@ -12,7 +12,7 @@ spec:
         kind: HelmRepository
         name: prog76-helm-repo
         namespace: flux-system
-      version: 0.0.0
+      version: 0.0.1
   values:
     metadata:
       name: loadtest
