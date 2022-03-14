@@ -1,19 +1,23 @@
 ---
-apiVersion: helm.fluxcd.io/v1
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
   name: prometheus-operator
   namespace: monitoring
-  annotations:
-    repository.fluxcd.io/prometheus: prometheus.prometheusSpec.image.repository
-    tag.fluxcd.io/prometheus: prometheus.prometheusSpec.image.tag
 spec:
-  releaseName: prometheus-operator
+  interval: 5m
   chart:
-    repository: https://prometheus-community.github.io/helm-charts
-    name: kube-prometheus-stack
-    version: 11.1.1
+    spec:
+      chart: kube-prometheus-stack
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus
+        namespace: flux-system
+      version: 11.1.1
   values:
+    commonLabels:
+      app.kubernetes.io/project: monitoring
+      app.kubernetes.io/instance: dev
 
     kubelet:
       enabled: true

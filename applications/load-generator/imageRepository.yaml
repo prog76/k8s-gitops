@@ -1,0 +1,22 @@
+apiVersion: image.toolkit.fluxcd.io/v1beta1
+kind: ImagePolicy
+metadata:
+  name: load-generator
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: load-generator-repo
+  policy:
+    semver:
+      range: 1.0.x
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta1
+kind: ImageRepository
+metadata:
+  name:  load-generator-repo
+  namespace: flux-system
+spec:
+  secretRef:
+    name: load-generator-repo-credentials
+  image: docker.io/prog76/load-generator 
+  interval: 1m0s

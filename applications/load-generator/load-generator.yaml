@@ -1,18 +1,18 @@
----
-apiVersion: helm.fluxcd.io/v1
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
   name: loadtest
   namespace: load-generator
-  annotations:
-    fluxcd.io/automated: "true"
-    filter.fluxcd.io/tag.chart-image: semver:~1.0
 spec:
-  releaseName: loadtest
+  interval: 5m
   chart:
-    repository: https://devservicetitan.azurecr.io/helm/v1/repo/
-    name: app-chart
-    version: 0.0.0
+    spec:
+      chart: app-chart
+      sourceRef:
+        kind: HelmRepository
+        name: prog76-helm-repo
+        namespace: flux-system
+      version: 0.0.0
   values:
     metadata:
       name: loadtest
@@ -20,8 +20,8 @@ spec:
       instance: dev
       component: web
     image:
-      repository: docker.io/prog76/load-generator
-      tag: 1.0.1647230834
+      repository:  docker.io/prog76/load-generator # {"$imagepolicy": "flux-system:load-generator:name"}
+      tag: 1.0.1647230834 # {"$imagepolicy": "flux-system:load-generator:tag"}
     minReadySeconds: 10
     autoscale:
       enabled: true
@@ -29,22 +29,15 @@ spec:
       minReplicas: 1
       targetCPUUtilizationPercentage: 60
       behavior:
-        scaleUp:
-          policies:
-          - type: Percent
-            value: 2000
-            periodSeconds: 15
-          - type: Pods
-            value: 4
-            periodSeconds: 15
-          selectPolicy: Max
+        scaleDown:
+          stabilizationWindowSeconds: 3600
     env_map:
-      foo: bar27
+      foo: bar29
       WARMUP_DELAY: 50000
       SHUTDOWN_DELAY: 50000
-#      testsecret: "vault:secret/kubernetes/services/test/value.key"
-#    vault:
-#      enabled: true
+      #      testsecret: "vault:secret/kubernetes/services/test/value.key"
+      #    vault:
+      #      enabled: true
     probes:
       startupProbe:
         httpGet:

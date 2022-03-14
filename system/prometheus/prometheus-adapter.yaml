@@ -1,0 +1,48 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: prometheus-adapter
+  namespace: monitoring
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: prometheus-adapter
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus
+        namespace: flux-system
+      version: 3.0.0
+  values:
+    image:
+      repository: k8s.gcr.io/prometheus-adapter/prometheus-adapter
+      tag: v0.9.1
+    prometheus:
+      url: http://prometheus-operator-kube-p-prometheus
+      port: 9090
+      path: ""
+    rules:
+      default: false 
+      custom:
+      - metricsQuery: avg(<<.Series>>{metadata_component="worker-normal",<<.LabelMatchers>>}) by (<<.GroupBy>>)
+        seriesQuery: 'st_Queue_Size'
+        resources:
+          template: <<.Resource>>
+        name:
+          as: "st_Queue_Size_worker-normal"
+      - metricsQuery: avg(<<.Series>>{metadata_component="worker-high",<<.LabelMatchers>>}) by (<<.GroupBy>>)
+        seriesQuery: 'st_Queue_Size'
+        resources:
+          template: <<.Resource>>
+        name:
+          as: "st_Queue_Size_worker-high"
+      - metricsQuery: avg(<<.Series>>{metadata_component="worker-low",<<.LabelMatchers>>}) by (<<.GroupBy>>)
+        seriesQuery: 'st_Queue_Size'
+        resources:
+          template: <<.Resource>>
+        name:
+          as: "st_Queue_Size_worker-low"
+    resources:
+      limits:
+        cpu: 1.0
+        memory: 128Mi
