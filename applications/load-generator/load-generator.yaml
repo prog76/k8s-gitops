@@ -31,6 +31,9 @@ spec:
       behavior:
         scaleDown:
           stabilizationWindowSeconds: 3600
+    metrics:
+      scrape: 
+        enabled: true          
     env_map:
       foo: bar29
       WARMUP_DELAY: 50000
