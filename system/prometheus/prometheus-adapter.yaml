@@ -44,5 +44,4 @@ spec:
           as: "st_Queue_Size_worker-low"
     resources:
       limits:
-        cpu: 1.0
         memory: 128Mi
