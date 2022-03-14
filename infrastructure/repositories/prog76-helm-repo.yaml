@@ -1,0 +1,11 @@
+apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: HelmRepository
+metadata:
+  name: prog76-helm-repo
+  namespace: flux-system
+spec:
+  url: https://raw.githubusercontent.com/prog76/k8s-helm-repo/main
+  secretRef:
+    name: prog76-helm-repo-creds
+  interval: 10m
+

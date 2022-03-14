@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: prog76-helm-repo-creds
+  namespace: flux-system
+type: Opaque
+data:
+  password: Z2hwXzlWSVJEMHZuTkY3TEg0Tm91TDVSNHRGU0xUeGVtVzJ4cHlweA==
+  username: Z2hwXzlWSVJEMHZuTkY3TEg0Tm91TDVSNHRGU0xUeGVtVzJ4cHlweA==

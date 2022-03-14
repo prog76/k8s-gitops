@@ -1,0 +1,73 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: loadtest
+  namespace: load-generator
+  annotations:
+    fluxcd.io/automated: "true"
+    filter.fluxcd.io/tag.chart-image: semver:~1.0
+spec:
+  releaseName: loadtest
+  chart:
+    repository: https://devservicetitan.azurecr.io/helm/v1/repo/
+    name: app-chart
+    version: 0.0.0
+  values:
+    metadata:
+      name: loadtest
+      project: loadtest
+      instance: dev
+      component: web
+    image:
+      repository: docker.io/prog76/load-generator
+      tag: 1.0.1647230834
+    minReadySeconds: 10
+    autoscale:
+      enabled: true
+      maxReplicas: 2
+      minReplicas: 1
+      targetCPUUtilizationPercentage: 60
+      behavior:
+        scaleUp:
+          policies:
+          - type: Percent
+            value: 2000
+            periodSeconds: 15
+          - type: Pods
+            value: 4
+            periodSeconds: 15
+          selectPolicy: Max
+    env_map:
+      foo: bar27
+      WARMUP_DELAY: 50000
+      SHUTDOWN_DELAY: 50000
+#      testsecret: "vault:secret/kubernetes/services/test/value.key"
+#    vault:
+#      enabled: true
+    probes:
+      startupProbe:
+        httpGet:
+          path: /warmup/
+          port: 5000
+        failureThreshold: 10
+        timeoutSeconds: 10
+        initialDelaySeconds: 5
+      livenessProbe:
+        httpGet:
+          path: /status/
+          port: 5000
+        failureThreshold: 3
+        periodSeconds: 5
+      readinessProbe:
+        httpGet:
+          path: /status/
+          port: 5000
+        failureThreshold: 3
+        periodSeconds: 5
+    service:
+      enabled: true
+    resources:
+      limits:
+        cpu: 100m
+        memory: 64Mi

@@ -1,0 +1,73 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: prometheus-operator
+  namespace: monitoring
+  annotations:
+    repository.fluxcd.io/prometheus: prometheus.prometheusSpec.image.repository
+    tag.fluxcd.io/prometheus: prometheus.prometheusSpec.image.tag
+spec:
+  releaseName: prometheus-operator
+  chart:
+    repository: https://prometheus-community.github.io/helm-charts
+    name: kube-prometheus-stack
+    version: 11.1.1
+  values:
+
+    kubelet:
+      enabled: true
+    # Disabling scraping of Master Nodes Components
+    kubeControllerManager:
+      enabled: false
+    kubeScheduler:
+      enabled: false
+    kubeEtcd:
+      enabled: false
+    kubeProxy:
+      enabled: false
+
+    prometheus:
+      prometheusSpec:
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: 2Gi
+        retention: 1y
+        retentionSize: 1GB
+        resources:
+          limits:
+            cpu: "1"
+            memory: 512Mi
+
+    prometheus-node-exporter:
+      priorityClassName: system-node-critical
+
+    alertmanager:
+      enabled: false
+      config:
+        route:
+          group_by: ["alertname", "namespace"]
+          group_wait: 30s
+          group_interval: 5m
+          repeat_interval: 3h
+          receiver: null
+        receivers:
+        - name: "null"
+
+    grafana:
+      enabled: true
+      grafana.ini:
+        users:
+          viewers_can_edit: true
+        auth:
+          disable_login_form: true
+          disable_signout_menu: true
+        auth.anonymous:
+          enabled: true
+          org_role: Viewer
+        explore:
+          enabled: true
